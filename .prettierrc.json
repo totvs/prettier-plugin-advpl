@@ -1,0 +1,20 @@
+{
+    "parser": "advpl",
+    "printWidth": 80,
+    "useTabs": false,
+    "tabWidth": 2,
+    "insertPragma": false,
+    "requirePragma": false,
+    "advplBraces": false,
+    "advplBracket": false,
+    "advplComma": false,
+    "advplKeywordsCase": "upper",
+    "advplMathOperators": false,
+    "advplParenthesis": false,
+    "advplStringStyle": "ignore",
+    "advplMaxEmptyLines": 0,
+    "advplAlignComment": 0,
+    "advplBreakLineInSemiColon": false,
+    "advplBreakLineInCodeBlock": false,
+    "advplExpandShortCommand": true
+}

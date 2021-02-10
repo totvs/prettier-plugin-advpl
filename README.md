@@ -1,4 +1,4 @@
-# Prettier 4GL Plugin
+# Prettier AdvPL Plugin
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
@@ -12,12 +12,12 @@ Primero, efetuar a instalação do [Prettier](https://prettier.io/docs/en/instal
 
 Para uso local:
 ```
-npm install prettier-plugin-4gl --save-dev
+npm install prettier-plugin-advpl --save-dev
 ```
 
 Para uso global:
 ```
-npm install prettier-plugin-4gl -g
+npm install prettier-plugin-advpl -g
 ```
 
 ## Opções
@@ -40,35 +40,37 @@ Abaixo, configurações do _Prettier_ utilizados pela extensão.
 | -w, --write          | Grava o arquivo formato. Cuidado: o arquivo original será sobrescrito.|
 |                      | Padrão: false                                                         |
 
-### 4GL
+### AdvPL
 
-Chaves específicas para formatação de fontes 4GL.
+Chaves específicas para formatação de fontes AdvPL.
 
-| Chave                      | Uso                                                       |
-| -------------------------- | --------------------------------------------------------- |
-| --4gl-align-fields <int>   | Alinhar identificação de campos em comandos DEFINE/RECORD.|
-|                            | Padrão: 0 (desligado)                                     |
-| --4gl-align-comment <int>  | Coluna de alinhamento de comentário de fim de linha.      |
-|                            | Padrão: 0 (desligado)                                     |
-| --4gl-braces               | Espaçamento entre chaves.                                 |
-|                            | Padrão: false                                             |
-| --4gl-bracket              | Espaçamento entre colchetes.                              |
-|                            | Padrão: false                                             |   
-| --4gl-comma                | Espaçamento após virgulas de separção.                    |
-|                            | Padrão: false                                             |
-| --4gl-format-number        | Formata números, p.e. 1234 é formatado para 1,234.        |
-|                            | Padrão: false                                             |
-| --4gl-keywords-case        | Coloca palavras-chaves em maiúsculas ou minúsculas.       |
-|  <upper|lower|ignore>      | Padrão: upper.                                            |
-| --4gl-max-empty-line <int> | Máximo de linhas em branco na sequência.                  |
-|                            | Padrão: 0 (sem limite)                                    |
-| --4gl-math-operators       | Espaçamento em operadores matemáticos                     |
-|                            | Padrão: false                                             |
-| --4gl-parenthesis          | Espaçamento entre parentesis.                             |
-|                            | Padrão: false                                             |
-| --4gl-string-style         | Usar aspas simples ou duplas em strings.                  |
-| <double-quotes|single-quotes|ignore>| Padrão: ignore                                 |
-                           
+| Chave                        | Uso                                                       |
+| ---------------------------- | --------------------------------------------------------- |
+| --advpl-align-comment <int>  | Coluna de alinhamento de comentário de fim de linha.      |
+|                              | Padrão: 0 (desligado)                                     |
+| --advpl-braces               | Espaçamento entre chaves.                                 |
+|                              | Padrão: false                                             |
+| --advpl-bracket              | Espaçamento entre colchetes.                              |
+|                              | Padrão: false                                             |   
+| --advpl-comma                | Espaçamento após virgulas de separção.                    |
+|                              | Padrão: false                                             |
+| --advpl-keywords-case        | Coloca palavras-chaves em maiúsculas ou minúsculas.       |
+|  <upper|lower|ignore>        | Padrão: upper.                                            |
+| --advpl-max-empty-line <int> | Máximo de linhas em branco na sequência.                  |
+|                              | Padrão: 0 (sem limite)                                    |
+| --advpl-math-operators       | Espaçamento em operadores matemáticos                     |
+|                              | Padrão: false                                             |
+| --advpl-parenthesis          | Espaçamento entre parentesis.                             |
+|                              | Padrão: false                                             |
+| --advpl-string-style         | Usar aspas simples ou duplas em strings.                  |
+| <double-quotes|single-quotes|ignore>| Padrão: ignore                                     |
+| --advplBreakLineInSemiColon  | Quebre a linha quando houver um ponto e vírgula (continuação). |  
+|                              | Padrão: false                                             |
+| --advplBreakLineInCodeBlock  | Quebra a linha em bloco de código.                        |
+|                              | Padrão: false                                             |
+| --advplExpandShortCommand    | expandir comando abreviado, p.e. 'func' para 'function    |
+|                              | Padrão: false                                             |
+
 ### Uso em linha de comando
 
 > Detalhes sobre o [uso em CLI](https://prettier.io/docs/en/cli.html).
@@ -76,23 +78,25 @@ Chaves específicas para formatação de fontes 4GL.
 > Em determinados sistemas operacionais ou devido a politicas de segurança, pode ser necessário configurações adicionais. Veja a documentação específica do seu sistema operacional ou acione o resposável de infra-estrutura/segurança. 
 
 ```
-npm prettier --parser=4gl [options]
+npm prettier --parser=advpl [options]
 ```
 
 ### Integração com editores
 
 Ver [Editor Integration](https://prettier.io/docs/en/editors.html).
 
-Nesse modo informe as opções usando o nome longo da opção sem o `--` e as letras precedidas por '-' em maiúsculas, na sessão `4gl.formatter` ou `advpl.formatter` no arquivo `settings.json`.
+Nesse modo informe as opções usando o nome longo da opção sem o `--` e as letras precedidas por '-' em maiúsculas, na sessão `advpl.formatter` no arquivo `settings.json`.
 
 ```JSON
 {
   ...
-  "4gl.formatter": {
+  "advpl.formatter": {
     "keywordsCase": "upper",
     "stringStyle": "ignore",
     "formatNumber": false,
-    "operatorSpacing": false
+    "operatorSpacing": false,
+    "advplBreakLineInSemiColon": false,
+|   "advplBreakLineInCodeBlock":  false, 
   }
   ...
 ```
@@ -102,10 +106,10 @@ Nesse modo informe as opções usando o nome longo da opção sem o `--` e as le
 Nesse modo, informe as opções usando o nome longo das opções sem o `--`.
 
 ```Typescript
-  const options: any = { ... } //Prettier Options and Formatter 4GL Options*
+  const options: any = { ... } //Prettier Options and Formatter AdvPL Options*
   //Full source
   let result: any = prettier.format(content, {
-    parser: "4gl",
+    parser: "advpl",
     ...options,
   });
 ```
@@ -125,7 +129,7 @@ Nesse modo, informe as opções usando o nome longo das opções sem o `--`.
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/brodao"><img src="https://avatars0.githubusercontent.com/u/949914?v=4?s=50" width="50px;" alt=""/><br /><sub><b>Alan Cândido</b></sub></a><br /><a href="https://github.com/totvs/@totvs/prettier-plugin-4gl/commits?author=brodao" title="Code">💻</a> <a href="https://github.com/totvs/@totvs/prettier-plugin-4gl/commits?author=brodao" title="Documentation">📖</a> <a href="https://github.com/totvs/@totvs/prettier-plugin-4gl/commits?author=brodao" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/brodao"><img src="https://avatars0.githubusercontent.com/u/949914?v=4?s=50" width="50px;" alt=""/><br /><sub><b>Alan Cândido</b></sub></a><br /><a href="https://github.com/totvs/@totvs/prettier-plugin-advpl/commits?author=brodao" title="Code">💻</a> <a href="https://github.com/totvs/@totvs/prettier-plugin-advpl/commits?author=brodao" title="Documentation">📖</a> <a href="https://github.com/totvs/@totvs/prettier-plugin-advpl/commits?author=brodao" title="Tests">⚠️</a></td>
   </tr>
 </table>
 
