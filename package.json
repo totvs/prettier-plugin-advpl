@@ -8,7 +8,7 @@
     "name": "TOTVS",
     "email": "tecnologia@totvs.com.br"
   },
-  "license": "MIT",
+   "license": "Apache 2.0",
   "keywords": [
     "advPL",
     "tds",
@@ -61,7 +61,7 @@
   },
   "dependencies": {
     "prettier": "^2.2.1",
-    "tds-parsers": "^0.0.13",
+    "tds-parsers": "^0.0.14",
     "typescript": "^4.1.3"
   },
   "devDependencies": {

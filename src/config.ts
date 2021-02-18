@@ -7,11 +7,11 @@ export const options: {} = {
     category: CATEGORY_ADVPL,
     type: "choice",
     choices: [
-      { value: "upper" }, 
-      { value: "lower" }, 
+      { value: "upper" },
+      { value: "lower" },
       { value: "ignore" }
     ],
-    default: "upper",
+    default: "ignore",
     description: "Put keywords to upper or lowser case.",
   },
   "advplStringStyle": {
@@ -105,7 +105,7 @@ export const options: {} = {
     since: SINCE,
     category: CATEGORY_ADVPL,
     type: "boolean",
-    default: false,
+    default: true,
     description: "Expand short command, e.g. 'func' to 'function'.",
   },
 };
@@ -116,14 +116,5 @@ export const prettierOptions: any = {
   tabWidth: 2,
   insertPragma: false,
   requirePragma: false,
-}
-
-export function getAdvPLDefaultOptions() {
-  const defaultOptions: {} = {};
-
-  Object.keys(options).forEach((key) => {
-    defaultOptions[key] = options[key]["default"];
-  });
-
-  return defaultOptions;
+  willPrintOwnComments: true
 }

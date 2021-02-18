@@ -103,7 +103,7 @@ const parsers = {
     },
     astFormat: "advpl-token",
     // locStart: locStart,
-    // locEnd: locEnd,
+    locEnd: locEnd,
     hasPragma: hasPragma,
   },
 };

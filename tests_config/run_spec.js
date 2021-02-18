@@ -22,7 +22,7 @@ function run_spec(dirname, options) {
       let cursorOffset;
 
       const source = read(filepath)
-        .replace(/\r\n/g, "\n")
+        //.replace(/\r\n/g, "\n")
         .replace("<<<PRETTIER_RANGE_START>>>", (match, offset) => {
           rangeStart = offset;
           return "";
@@ -56,45 +56,20 @@ function run_spec(dirname, options) {
 global.run_spec = run_spec;
 
 function processTest(mergedOptions, filename, input) {
-  if (path.dirname(mergedOptions.filepath).endsWith("xrange")) {
-    //Range format not support: apparent prettier restriction
-    describe("Uso de RANGE", () => {
-      test(filename, () => {
-        const output = prettyprint(input, { ...mergedOptions });
+  test(filename, () => {
+    const output = prettyprint(input, { ...mergedOptions });
 
-        expect(
-          raw(input + "~".repeat(mergedOptions.printWidth) + "\n" + output)
-        ).toMatchSnapshot();
-      });
-    });
-  } else if (path.dirname(mergedOptions.filepath).endsWith("pragma")) {
-    describe("Uso de PRAGMA", () => {
-      beforeEach(() => {
-        mergedOptions.requirePragma = true;
-        mergedOptions.insertPragma = true;
-      });
-      afterEach(() => {
-        mergedOptions.requirePragma = false;
-        mergedOptions.insertPragma = false;
-      });
-
-      test(filename, () => {
-        const output = prettyprint(input, { ...mergedOptions });
-
-        expect(
-          raw(input + "~".repeat(mergedOptions.printWidth) + "\n" + output)
-        ).toMatchSnapshot();
-      });
-    });
-  } else {
-    test(filename, () => {
-      const output = prettyprint(input, { ...mergedOptions });
-
-      expect(
-        raw(input + "~".repeat(mergedOptions.printWidth) + "\n" + output)
-      ).toMatchSnapshot();
-    });
-  }
+    expect(
+      raw(
+        input
+        + "-".repeat(10)
+        + "\n"
+        + output
+        + "\n"
+        + "~".repeat(mergedOptions.printWidth)
+      )
+    ).toMatchSnapshot();
+  });
 }
 
 function prettyprint(src, options) {

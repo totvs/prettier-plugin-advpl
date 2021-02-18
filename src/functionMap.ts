@@ -24,20 +24,22 @@ const { stripTrailingHardline, removeLines } = require("prettier").doc.utils;
 
 function buildProgram(path, print, options) {
   const node: AST.ASTNode = path.getValue();
+  const result = concat(path.map(print, 'children'));
 
-  return concat(path.map(print, 'children'));
+  return result;
 }
 
 function buildBlock(path, print, options) {
-  const begin = path.call(print, "children_0");
-  const body = path.call(print, "children_1");
-  const end = path.call(print, "children_2");
+  const node: AST.ASTNode = path.getValue();
 
-  return concat([indent(begin), body, dedent(end)]);
+  const source = path.map(print, "source");
+  const children = path.map(print, "children");
+
+  return concat([indent(source), children, dedent([])]);
 }
 
 function buildArgumentList(path, print, options) {
-  const open = path.call(print, "children");
+  const open = path.map(print, "children");
 
   return concat(open);
 }
@@ -46,7 +48,7 @@ function buildKeyword(path, print, options) {
   const node: AST.ASTNode = path.getValue();
   let value = node.source;
 
-  if (options["advplExpandShortCommands"]) {
+  if (options["advplExpandShortCommand"] && node.getAttribute("command")) {
     value = node.getAttribute("command");
   }
 
@@ -60,10 +62,6 @@ function buildKeyword(path, print, options) {
 }
 
 function buildWhiteSpace(path, print, options) {
-  if ((lastNode.type == EASTType.newLine)) {
-    return "";
-  }
-
   const node: AST.ASTNode = path.getValue();
   let value = node.source;
 
@@ -82,28 +80,23 @@ function buildEndLine(path, print, options) {
 }
 
 function buildNewLine(path, print, options) {
-  // const node: AST.ASTNode = path.getValue();
-  // let value = node.source;
-  if (lastNode.type == EASTType.newLine) {
-    if (options["advplMaxEmptyLines"] != 0) {
-      emptyLinesCount++;
-      if (emptyLinesCount < options["advplMaxEmptyLines"]) {
-        return line;
-      } else {
-        return "";
-      }
-    }
-  }
-  emptyLinesCount=0;
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result: any[] = value.split("\n");
+  result.fill(line);
 
-  return line;
+  if (options["advplMaxEmptyLines"] > 1) {
+    result = result.splice(options["advplMaxEmptyLines"]);
+  }
+
+  return concat(result);
 }
 
 function buildIdentifier(path, print, options) {
   const node: AST.ASTNode = path.getValue();
   let value = node.source;
 
-  return value;
+  return concat(value);
 }
 
 function buildOperator(path, print, options) {
@@ -162,6 +155,14 @@ function buildOperatorParenthesis(path, print, options) {
   return result;
 }
 
+function buildOperatorAssign(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  return result;
+}
+
 function buildBlockComment(path, print, options) {
   const node: AST.ASTNode = path.getValue();
   const value = node.source;
@@ -184,7 +185,7 @@ function buildOperatorSeparator(path, print, options) {
   let result = value;
 
   if (options["advplSeparator"]) {
-    result += " )";
+    result += " ";
   }
 
   return result;
@@ -216,24 +217,15 @@ function buildNumber(path, print, options) {
 function buildDirective(path, print, options) {
   const node: AST.ASTNode = path.getValue();
 
-  return concat(path.map(print, "source"));
+  return concat(path.call(print, "source"));
 }
 
 let _builderMap;
 let emptyLinesCount = 0;
-let lastNode: ASTNode;
 
-function builderMap(_options) {
-  const options = _options;
-  const defaultOptions: {} = require("./config").getAdvPLDefaultOptions();
-
-  Object.keys(defaultOptions).forEach((key) => {
-    if (options[key] == undefined) {
-      options[key] = defaultOptions[key];
-    }
-  });
-
+function builderMap(options) {
   const map: {} = {};
+
   map[AST.EASTType.program] = (path, print) => buildProgram(path, print, options);
   map[AST.EASTType.block] = (path, print) => buildBlock(path, print, options);
   map[AST.EASTType.argumentList] = (path, print) => buildArgumentList(path, print, options);
@@ -248,12 +240,12 @@ function builderMap(_options) {
   map[AST.EASTType.operatorMath] = (path, print) => buildOperatorMath(path, print, options);
   map[AST.EASTType.operatorParenthesis] = (path, print) => buildOperatorParenthesis(path, print, options);
   map[AST.EASTType.operatorSeparator] = (path, print) => buildOperatorSeparator(path, print, options);
+  map[AST.EASTType.operatorAssign] = (path, print) => buildOperatorAssign(path, print, options);
   map[AST.EASTType.comment] = (path, print) => buildComment(path, print, options);
   map[AST.EASTType.blockComment] = (path, print) => buildBlockComment(path, print, options);
   map[AST.EASTType.string] = (path, print) => buildString(path, print, options);
   map[AST.EASTType.number] = (path, print) => buildNumber(path, print, options);
   map[AST.EASTType.directive] = (path, print) => buildDirective(path, print, options);
-  
 
   return map;
 }
@@ -265,7 +257,6 @@ function resetFunctionMap() {
 export function printElement(path, options, print) {
   if (!_builderMap) {
     _builderMap = builderMap(options);
-    lastNode = path.getValue();
   }
 
   const node: AST.ASTNode = path.getValue();
@@ -274,10 +265,6 @@ export function printElement(path, options, print) {
 
   if (builder) {
     result = builder(path, print, options);
-  }
-
-  if (node.type != EASTType.whiteSpace) {
-    lastNode = node;
   }
 
   return result;
