@@ -1,10 +1,23 @@
-import { printElement } from "./functionMap";
+import { util } from 'prettier';
+import AST = require('@totvs/tds-parsers');
 
 const {
-  doc: {
-    builders: { concat, group },
-  },
-} = require("prettier");
+  concat,
+  join,
+  line,
+  ifBreak,
+  group,
+  hardline,
+  softline,
+  fill,
+  indent,
+  dedent,
+  trim,
+  markAsRoot,
+  addAlignmentToDoc,
+} = require('prettier').doc.builders;
+
+const { stripTrailingHardline, removeLines } = require('prettier').doc.utils;
 
 export function printJSON(path, options, print, args) {
   const node = path.getValue();
@@ -12,24 +25,144 @@ export function printJSON(path, options, print, args) {
   return JSON.stringify(node, undefined, 2);
 }
 
-export function printSource(path, options, print, args) {
+let ignoreWS: boolean = false;
+
+export function printToken(path, options, print, args) {
   const node = path.getValue();
 
   if (!node) {
-    return "";
+    return '';
   }
 
-  if (typeof node === "string") {
+  if (typeof node === 'string') {
     return node;
   }
 
   if (Array.isArray(node)) {
-    return concat(path.map(print));
+    return treatMap(path.map(print));
   }
 
-  let result = printElement(path, options, print);
+  let result: any = undefined;
 
-  if (!result) {
+  switch (node.type) {
+    case AST.EASTType.program:
+    case AST.EASTType.beginBlock:
+    case AST.EASTType.endBlock:
+      result = treatMap(path.map(print, 'children'));
+      break;
+
+    case AST.EASTType.bodyBlock:
+      result = treatMap(path.map(print, 'children'));
+      break;
+
+    case AST.EASTType.block:
+      const aux: any = treatMap(path.map(print, 'children'));
+      result = concat([
+        indent(concat([aux.parts[0], aux.parts[1]])),
+        line,
+        aux.parts[2],
+      ]);
+      break;
+
+    case AST.EASTType.directive:
+      result = buildDirective(path, print, options);
+      break;
+
+    case AST.EASTType.operatorAssign:
+      result = buildOperatorAssign(path, print, options);
+      break;
+
+    case AST.EASTType.argumentList:
+      result = buildArgumentList(path, print, options);
+      break;
+
+    case AST.EASTType.keyword:
+      ignoreWS = false;
+      result = buildKeyword(path, print, options);
+      break;
+
+    case AST.EASTType.whiteSpace:
+      if (!ignoreWS) {
+        result = buildWhiteSpace(path, print, options);
+      } else {
+        result = '';
+      }
+      break;
+
+    case AST.EASTType.endLine:
+      ignoreWS = true;
+      result = buildEndLine(path, print, options);
+      break;
+
+    case AST.EASTType.newLine:
+      result = buildNewLine(path, print, options);
+      break;
+
+    case AST.EASTType.identifier:
+      result = buildIdentifier(path, print, options);
+      break;
+
+    case AST.EASTType.operator:
+      result = buildOperator(path, print, options);
+      break;
+
+    case AST.EASTType.operatorBraces:
+      result = buildOperatorBraces(path, print, options);
+      break;
+
+    case AST.EASTType.operatorBracket:
+      result = buildOperatorBracket(path, print, options);
+      break;
+
+    case AST.EASTType.operatorMath:
+      result = buildOperatorMath(path, print, options);
+      break;
+
+    case AST.EASTType.operatorParenthesis:
+      result = buildOperatorParenthesis(path, print, options);
+      break;
+
+    case AST.EASTType.operatorSeparator:
+      result = buildOperatorSeparator(path, print, options);
+      break;
+
+    case AST.EASTType.comment:
+      result = path.getValue().source;
+      ignoreWS = ignoreWS || result.endsWith('\n');
+      if (result.endsWith('\n')) {
+        result = result.substring(0, result.length - 1);
+        result = concat([result, hardline]);
+      }
+      break;
+
+    case AST.EASTType.blockComment:
+      result = buildBlockComment(path, print, options);
+      ignoreWS = ignoreWS || result.endsWith('\n');
+      if (result.endsWith('\n')) {
+        result = result.substring(0, result.length - 1);
+        result = concat([result, hardline]);
+      }
+      break;
+
+    case AST.EASTType.singleComment:
+      result = buildSingleComment(path, print, options);
+      break;
+
+    case AST.EASTType.string:
+      result = buildString(path, print, options);
+      break;
+
+    case AST.EASTType.number:
+      result = buildNumber(path, print, options);
+      break;
+
+    default:
+      console.error('Invalid EASType: ' + node.type);
+      result = undefined;
+      break;
+  }
+
+  if (result === undefined) {
     const node = path.getValue();
     result = JSON.stringify(node, undefined, 3);
   }
@@ -37,27 +170,200 @@ export function printSource(path, options, print, args) {
   return result;
 }
 
-export function printToken(path, options, print, args) {
-  const node = path.getValue();
+function treatMap(resultMap: any): any {
+  let result: any = undefined;
 
-  if (!node) {
-    return "";
-  }
-
-  if (typeof node === "string") {
-    return node;
-  }
-
-  if (Array.isArray(node)) {
-    return concat(path.map(print));
-  }
-
-  let result = printElement(path, options, print);
-
-  if (result == undefined) {
-    const node = path.getValue();
-    result = JSON.stringify(node, undefined, 3);
+  if (Array.isArray(resultMap)) {
+    if (resultMap.length == 0) {
+      result = '';
+    } else if (resultMap.length == 1) {
+      result = resultMap[0];
+    } else {
+      result = concat(resultMap);
+    }
   }
 
   return result;
+}
+
+function buildArgumentList(path, print, options) {
+  const open = path.map(print, 'children');
+
+  return concat(open);
+}
+
+function buildKeyword(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  let value = node.source;
+
+  if (options['advplExpandShortCommand'] && node.getAttribute('command')) {
+    value = node.getAttribute('command');
+  }
+
+  if (options['advplKeywordsCase'] === 'upper') {
+    value = value.toUpperCase();
+  } else if (options['advplkeywordsCase'] === 'lower') {
+    value = value.toLowerCase();
+  }
+
+  return value;
+}
+
+function buildWhiteSpace(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  let value = node.source;
+
+  if (options.useTabs) {
+    value = value.replace(' '.repeat(options.tabWidth), '\t');
+  } else {
+    value = value.replace(/\\t/g, ' '.repeat(options.tabWidth));
+  }
+
+  return value;
+}
+
+function buildEndLine(path, print, options) {
+  return concat(path.map(print, 'source'));
+}
+
+function buildNewLine(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  const max =
+    options['advplMaxEmptyLines'] != 0 ? options['advplMaxEmptyLines'] + 1 : -1;
+  const result: any[] = value
+    .split('\n')
+    .fill(hardline, 0, max)
+    .filter((element: any) => {
+      return typeof element === 'object';
+    });
+
+  return treatMap(result);
+}
+
+function buildIdentifier(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  let value = node.source;
+
+  return value;
+}
+
+function buildOperator(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  return result;
+}
+
+function buildOperatorBraces(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  if (options['advplBraces']) {
+    result = result === '{' ? '{ ' : ' }';
+  }
+
+  return result;
+}
+
+function buildOperatorBracket(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  if (options['advplBracket']) {
+    result = result === '[' ? '[ ' : ' ]';
+  }
+
+  return result;
+}
+
+function buildOperatorMath(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  if (options['advplMathOperators']) {
+    result = ' ' + result + ' ';
+  }
+
+  return result;
+}
+
+function buildOperatorParenthesis(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  if (options['advplParenthesis']) {
+    result = result === '(' ? '( ' : ' )';
+  }
+
+  return result;
+}
+
+function buildOperatorAssign(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  return result;
+}
+
+function buildBlockComment(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+
+  return value;
+}
+
+function buildSingleComment(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  return value;
+}
+
+function buildOperatorSeparator(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = value;
+
+  if (options['advplComma']) {
+    result += ' ';
+  }
+
+  return result;
+}
+
+function buildString(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+  const value = node.source;
+  let result = undefined;
+
+  if (options['advplStringStyle'] === 'ignore') {
+    result = value.toString();
+  } else if (options['advplStringStyle'] === 'single-quotes') {
+    result = util.makeString(value.substring(1, value.length - 1), "'", true);
+  } else {
+    //double-quotes
+    result = util.makeString(value.substring(1, value.length - 1), '"', true);
+  }
+
+  return result;
+}
+
+function buildNumber(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+
+  return node.source;
+}
+
+function buildDirective(path, print, options) {
+  const node: AST.ASTNode = path.getValue();
+
+  return concat(path.call(print, 'source'));
 }

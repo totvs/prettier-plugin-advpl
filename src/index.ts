@@ -1,17 +1,16 @@
-import { options } from "./config";
-import { printToken } from "./printers";
-import { parser as tds_parser } from "tds-parsers";
-import { IParserOptions } from "tds-parsers/typings/config";
-import { ASTNode } from "tds-parsers/typings/ast_node";
+import { options } from './config';
+import { printToken } from './printers';
+import { ASTNode, parser as tds_parser } from '@totvs/tds-parsers';
+import { IParserOptions } from '@totvs/tds-parsers/typings/config';
 
-const PRAGMA = "--@format";
+const PRAGMA = '--@format';
 
 const languages = [
   {
-    extensions: [".prw"],
-    name: "AdvPL",
-    parsers: ["advpl"],
-    vscodeLanguageIds: ["advpl"],
+    extensions: ['.prw'],
+    name: 'AdvPL',
+    parsers: ['advpl'],
+    vscodeLanguageIds: ['advpl'],
   },
 ];
 
@@ -64,19 +63,23 @@ function hasPragma(text) {
 }
 
 function insertPragma(text) {
-  return PRAGMA + "\n" + text;
+  return PRAGMA + '\n' + text;
 }
 
-function parser(text: string, api, options: IParserOptions): ASTNode | undefined {
+function parser(
+  text: string,
+  api,
+  options: IParserOptions
+): ASTNode | undefined {
   try {
     const parserInfo: any = {
       debug: false,
       filepath: options.filepath,
       parser: options.parser,
-      fileext: options.fileext
+      fileext: options.fileext,
     };
 
-    const result: any = tds_parser(text + "\n", parserInfo); //EOL obrigatório na última linha
+    const result: any = tds_parser(text + '\n', parserInfo); //EOL obrigatório na última linha
     if (result.error) {
       throw result.error;
     }
@@ -97,11 +100,11 @@ function parser(text: string, api, options: IParserOptions): ASTNode | undefined
 }
 
 const parsers = {
-  "advpl": {
+  advpl: {
     parse: (text, api, options) => {
       return parser(text, api, options);
     },
-    astFormat: "advpl-token",
+    astFormat: 'advpl-token',
     // locStart: locStart,
     locEnd: locEnd,
     hasPragma: hasPragma,
@@ -109,7 +112,7 @@ const parsers = {
 };
 
 const printers = {
-  "advpl-token": {
+  'advpl-token': {
     print: printToken,
     insertPragma: insertPragma,
   },
@@ -117,7 +120,7 @@ const printers = {
 
 //necessário exportar dessa forma para ser reconhecido como adicional do Prettier.
 module.exports = {
-  name: "prettier-plugin-advpl",
+  name: 'prettier-plugin-advpl',
   languages,
   parsers,
   printers,

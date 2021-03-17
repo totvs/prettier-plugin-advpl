@@ -1,110 +1,102 @@
-const CATEGORY_ADVPL: string = "ADVPL";
-const SINCE: string = "0.0.0";
+const CATEGORY_ADVPL: string = 'ADVPL';
+const SINCE: string = '0.0.0';
 
 export const options: {} = {
-  "advplKeywordsCase": {
+  advplKeywordsCase: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "choice",
+    type: 'choice',
+    choices: [{ value: 'upper' }, { value: 'lower' }, { value: 'ignore' }],
+    default: 'ignore',
+    description: 'Put keywords to upper or lowser case.',
+  },
+  advplStringStyle: {
+    since: SINCE,
+    category: CATEGORY_ADVPL,
+    type: 'choice',
     choices: [
-      { value: "upper" },
-      { value: "lower" },
-      { value: "ignore" }
+      { value: 'double-quotes' },
+      { value: 'single-quotes' },
+      { value: 'ignore' },
     ],
-    default: "ignore",
-    description: "Put keywords to upper or lowser case.",
+    default: 'ignore',
+    description: 'Start/end strings with quotes.',
   },
-  "advplStringStyle": {
+  advplBraces: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "choice",
-    choices: [
-      { value: "double-quotes" },
-      { value: "single-quotes" },
-      { value: "ignore" },
-    ],
-    default: "ignore",
-    description: "Start/end strings with quotes.",
-  },
-  "advplBraces":
-  {
-    since: SINCE,
-    category: CATEGORY_ADVPL,
-    type: "boolean",
+    type: 'boolean',
     default: false,
-    description: "Spacing in Braces operator."
+    description: 'Spacing in Braces operator.',
   },
-  "advplBracket":
-  {
+  advplBracket: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "boolean",
+    type: 'boolean',
     default: false,
-    description: "Spacing in Bracket operator."
+    description: 'Spacing in Bracket operator.',
   },
-  "advplParenthesis":
-  {
+  advplParenthesis: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "boolean",
+    type: 'boolean',
     default: false,
-    description: "Spacing in Parenthesis operator."
+    description: 'Spacing in Parenthesis operator.',
   },
-  "advplComma":
-  {
+  advplComma: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "boolean",
+    type: 'boolean',
     default: false,
-    description: "Spacing in Comma operator."
+    description: 'Spacing in Comma operator.',
   },
-  "advplMathOperators":
-  {
+  advplMathOperators: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "boolean",
+    type: 'boolean',
     default: false,
-    description: "Spacing in Mathematical operators."
+    description: 'Spacing in Mathematical operators.',
   },
-  "advplAlignFields": {
+  advplAlignFields: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "int",
+    type: 'int',
     default: 0,
-    description: "Align field name with padding spaces in DEFINE/RECORD statment.",
+    description:
+      'Align field name with padding spaces in DEFINE/RECORD statment.',
   },
-  "advplAlignComment": {
+  advplAlignComment: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "int",
+    type: 'int',
     default: 0,
-    description: "End of line comment alignment column. (0, off)",
+    description: 'End of line comment alignment column. (0, off)',
   },
-  "advplMaxEmptyLines": {
+  advplMaxEmptyLines: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "int",
+    type: 'int',
     default: 0,
-    description: "Maximum blank lines in sequence (0, no limits).",
+    description: 'Maximum blank lines in sequence (0, no limits).',
   },
-  "advplBreakLineInSemiColon": {
+  advplBreakLineInSemiColon: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "boolean",
+    type: 'boolean',
     default: false,
-    description: "Break the line when there is a semicolon.",
+    description: 'Break the line when there is a semicolon.',
   },
-  "advplBreakLineInCodeBlock": {
+  advplBreakLineInCodeBlock: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "boolean",
+    type: 'boolean',
     default: false,
-    description: "Breaks the line in code block.",
+    description: 'Breaks the line in code block.',
   },
-  "advplExpandShortCommand": {
+  advplExpandShortCommand: {
     since: SINCE,
     category: CATEGORY_ADVPL,
-    type: "boolean",
+    type: 'boolean',
     default: true,
     description: "Expand short command, e.g. 'func' to 'function'.",
   },
@@ -116,5 +108,5 @@ export const prettierOptions: any = {
   tabWidth: 2,
   insertPragma: false,
   requirePragma: false,
-  willPrintOwnComments: true
-}
+  willPrintOwnComments: true,
+};
