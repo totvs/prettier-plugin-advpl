@@ -2,7 +2,7 @@
   "name": "@totvs/prettier-plugin-advpl",
   "displayName": "Prettier Plugin AdvPL Formatter",
   "description": "Extensão Prettier para formatação de código AdvPL.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "TOTVS",
   "author": {
     "name": "TOTVS",
@@ -43,7 +43,7 @@
     "---TEST---": "",
     "test": "jest",
     "test:snapshot": "npm run test -- --updateSnapshot",
-    "test:singlefile": "npm run test -- --testNamePattern hello1.prw -u",
+    "test:singlefile": "npm run test -- --testNamePattern hello1.prw",
     "test:folder": "--testPathPattern",
     "test:coverage": "npm run test -- --coverage",
     "test:onlyFailures": "npm run test --onlyFailures ",
@@ -55,10 +55,11 @@
     "---MISC---": "",
     "contributors:check": "all-contributors check",
     "contributors:generate": "all-contributors generate",
+    "---LINKS---": "",
     "link:tds-parsers": "npm link ../tds-parsers --force"
   },
   "dependencies": {
-    "@totvs/tds-parsers": "^0.1.1",
+    "@totvs/tds-parsers": "^0.1.2",
     "prettier": "^2.2.1",
     "typescript": "^4.2.3"
   },
