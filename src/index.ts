@@ -1,68 +1,37 @@
 import { options } from './config';
 import { printToken } from './printers';
-import { ASTNode, parser as tds_parser } from '@totvs/tds-parsers';
+import { parser as tds_parser } from '@totvs/tds-parsers';
 import { IParserOptions } from '@totvs/tds-parsers/typings/config';
+import { ASTNode } from '@totvs/tds-parsers/typings/ast_node';
+import { AST } from 'prettier';
 
 const PRAGMA = '--@format';
 
 const languages = [
   {
-    extensions: ['.prw'],
+    extensions: [
+      '.prw',
+      '.prx',
+      '.prg',
+      '.ppx',
+      '.ppp',
+      '.tlpp',
+      '.apw',
+      '.aph',
+      '.apl',
+      '.ahu',
+    ],
     name: 'AdvPL',
     parsers: ['advpl'],
     vscodeLanguageIds: ['advpl'],
   },
 ];
 
-function locStart(ast) {
-  let offset = 0;
-
-  if (Array.isArray(ast)) {
-    if (ast.length > 0) {
-      for (let index = 0; index < ast.length; index++) {
-        const element = ast[index];
-        offset = locStart(element);
-        if (offset !== 0) {
-          break;
-        }
-      }
-    }
-  } else if (!ast.offset) {
-    offset = locStart(ast.value);
-  } else if (ast.kind) {
-    offset = ast.offset.start;
-  }
-
-  return offset;
-}
-
-function locEnd(ast) {
-  let offset = Infinity;
-
-  if (Array.isArray(ast)) {
-    if (ast.length > 0) {
-      for (let index = 0; index < ast.length; index++) {
-        const element = ast[index];
-        offset = locEnd(element);
-        if (offset !== 0) {
-          break;
-        }
-      }
-    }
-  } else if (!ast.offset) {
-    offset = locEnd(ast.value);
-  } else if (ast.kind) {
-    offset = ast.offset.end;
-  }
-
-  return offset;
-}
-
-function hasPragma(text) {
+function hasPragma(text: string) {
   return text.startsWith(PRAGMA);
 }
 
-function insertPragma(text) {
+function insertPragma(text: string) {
   return PRAGMA + '\n' + text;
 }
 
@@ -105,16 +74,20 @@ const parsers = {
       return parser(text, api, options);
     },
     astFormat: 'advpl-token',
-    // locStart: locStart,
-    locEnd: locEnd,
     hasPragma: hasPragma,
+    insertPragma: insertPragma,
   },
 };
+
+function preprocess(ast: AST, options: object): AST {
+  return ast;
+}
 
 const printers = {
   'advpl-token': {
     print: printToken,
     insertPragma: insertPragma,
+    preprocess: preprocess,
   },
 };
 
